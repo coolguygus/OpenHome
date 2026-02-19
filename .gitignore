@@ -50,3 +50,6 @@ target/
 *.sublime-project
 *.wakatime-project
 .idea
+
+# Windows build artifacts
+*.exe
