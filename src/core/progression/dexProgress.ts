@@ -25,6 +25,15 @@ function countInRange(set: Set<number>, start: number, end: number) {
   return count
 }
 
+export function computeLivingDexCount(stored: { dexNum: number }[], start: number, end: number): number {
+  const set = new Set<number>()
+  for (const m of stored) {
+    const n = m.dexNum
+    if (typeof n === 'number' && n >= start && n <= end) set.add(n)
+  }
+  return set.size
+}
+
 export function computeDexProgress(
   caughtDexNums: Set<number>,
   seenDexNums: Set<number>

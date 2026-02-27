@@ -7,13 +7,14 @@ import {
   ProgressionState,
   defaultProgressionState,
   isClaimed,
-  claim as claimMilestone,
+  claimMilestone,
 } from '@openhome-core/progression/progressionState'
 import { BackendContext } from '@openhome-ui/backend/backendContext'
 import useDisplayError from '@openhome-ui/hooks/displayError'
 import * as E from 'fp-ts/lib/Either'
 import { Tabs, Box } from '@radix-ui/themes'
 import { computeTypeProgress } from '@openhome-core/progression/typeProgress'
+import { applyReward } from '@openhome-core/progression/progressionState'
 
 type ProfileData = {
   name: string
@@ -102,61 +103,31 @@ export default function Profile() {
     )
     .catch((err) => displayError('Error loading progression', err))
 }, [backend, displayError])
-  useEffect(() => {
+useEffect(() => {
   backend
-    .getProgression()
+    .getProfile()
     .then(
       E.match(
-        async (err) => {
+        (err) => {
           const msg = String((err as any)?.message ?? err).toLowerCase()
           if (msg.includes('does not exist') || msg.includes('not found')) {
-            setProgression(defaultProgressionState)
-            setProgressionLoaded(true)
+            setProfile(defaultProfile)
+            setProfileLoaded(true)
             return
           }
-          displayError('Error loading progression', err)
+          displayError('Error loading profile', err)
         },
-        async (data) => {
+        (data) => {
           const anyData = data as any
-
-          const claimedMilestones = Array.isArray(anyData?.claimedMilestones)
-            ? anyData.claimedMilestones.filter((x: any) => typeof x === 'string')
-            : []
-
-          const unlocks =
-            anyData?.unlocks && typeof anyData.unlocks === 'object'
-              ? {
-                  ...defaultProgressionState.unlocks,
-                  ...anyData.unlocks,
-                  pokedex: {
-                    ...defaultProgressionState.unlocks.pokedex,
-                    ...(anyData.unlocks?.pokedex ?? {}),
-                  },
-                  vault: {
-                    ...defaultProgressionState.unlocks.vault,
-                    ...(anyData.unlocks?.vault ?? {}),
-                  },
-                }
-              : defaultProgressionState.unlocks
-
-          const counters =
-            anyData?.counters && typeof anyData.counters === 'object'
-              ? {
-                  ...defaultProgressionState.counters,
-                  ...anyData.counters,
-                }
-              : defaultProgressionState.counters
-
-          setProgression({
-            claimedMilestones,
-            unlocks,
-            counters,
+          setProfile({
+            name: typeof anyData?.name === 'string' ? anyData.name : defaultProfile.name,
+            title: typeof anyData?.title === 'string' ? anyData.title : defaultProfile.title,
           })
-          setProgressionLoaded(true)
+          setProfileLoaded(true)
         }
       )
     )
-    .catch((err) => displayError('Error loading progression', err))
+    .catch((err) => displayError('Error loading profile', err))
 }, [backend, displayError])
 
   const saveProfile = () => {
@@ -185,17 +156,15 @@ export default function Profile() {
   const handleClaim = (milestoneId: string) => {
   if (!progressionLoaded) return
 
-  const next = claimMilestone(progression, milestoneId)
+  const milestone = milestones.find((m) => m.id === milestoneId)
+  const claimed = claimMilestone(progression, milestoneId)
+  const next = milestone ? applyReward(claimed, milestone.reward) : claimed
+
   setProgression(next)
 
   backend
     .updateProgression(next as any)
-    .then(
-      E.match(
-        (err) => displayError('Error saving progression', err),
-        () => null
-      )
-    )
+    .then(E.match((err) => displayError('Error saving progression', err), () => null))
     .catch((err) => displayError('Error saving progression', err))
 }
 
@@ -267,7 +236,15 @@ export default function Profile() {
       const claimed = isClaimed(progression, m.id)
       return unlocked && !claimed
     })
-  }, [dexProgress, progression, vaultStats.totalStored, vaultStats.uniqueSpecies, vaultStats.shinyCount])
+  }, [
+  dexProgress,
+  progression,
+  progression.counters,
+  typeProgress,
+  vaultStats.totalStored,
+  vaultStats.uniqueSpecies,
+  vaultStats.shinyCount,
+])
 
   const renderReward = (reward: any) => {
   if (!reward) return ''

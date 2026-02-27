@@ -1,5 +1,5 @@
 import { DexProgress } from './dexProgress'
-import { ProgressionCounters, ProgressionUnlocks } from './progressionState'
+import { ProgressionCounters } from './progressionState'
 
 export type VaultStats = {
   totalStored: number
@@ -27,28 +27,6 @@ export type Milestone = {
     counters: ProgressionCounters
   ) => boolean
   reward: Reward
-}
-
-function typeCount(types: Record<string, number>, typeName: string) {
-  return types[typeName] ?? 0
-}
-
-function makeTypeMilestone(
-  typeName: string,
-  threshold: number,
-  rewardPokemon: string
-): Milestone {
-  const id = `type_${typeName}_${threshold}`
-  const prettyType = typeName.charAt(0).toUpperCase() + typeName.slice(1)
-
-  return {
-    id,
-    category: 'type',
-    title: `${prettyType} Mastery ${threshold}`,
-    description: `Store ${threshold} ${prettyType} type Pokémon.`,
-    isUnlocked: (_dex, _vault, types) => typeCount(types, typeName) >= threshold,
-    reward: { kind: 'pokemon', value: rewardPokemon },
-  }
 }
 
 export const milestones: Milestone[] = [
