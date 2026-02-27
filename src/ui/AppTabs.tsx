@@ -5,6 +5,7 @@ import Home from './pages/home/Home'
 import PluginsPage from './pages/plugins/Plugins'
 import PokedexDisplay from './pages/pokedex/PokedexDisplay'
 import Settings from './pages/Settings'
+import Profile from "./pages/Profile";
 import SortPokemon from './pages/sort/SortPokemon'
 import TrackedPokemon from './pages/tracked/TrackedPokemon'
 
@@ -40,6 +41,9 @@ export default function AppTabs() {
         <Tabs.Content value="settings">
           <Settings />
         </Tabs.Content>
+        <Tabs.Content value="profile">
+          <Profile />
+        </Tabs.Content>
         {isDev && (
           <>
             <Tabs.Content value="state">
@@ -58,6 +62,7 @@ export default function AppTabs() {
         <Tabs.Trigger value="pokedex">Pokédex</Tabs.Trigger>
         <Tabs.Trigger value="plugins">Plugins</Tabs.Trigger>
         <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
+        <Tabs.Trigger value="profile">Profile</Tabs.Trigger>
         {isDev && (
           <>
             <Tabs.Trigger value="state">App State</Tabs.Trigger>

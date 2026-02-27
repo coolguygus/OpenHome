@@ -276,6 +276,18 @@ export const TauriBackend: BackendInterface = {
   updateSettings: async (settings: Settings) => {
     return TauriInvoker.writeStorageFileJSON('settings.json', settings as unknown as JSONObject)
   },
+  getProfile: async () => {
+    return TauriInvoker.getStorageFileJSON('profile.json') as Promise<Errorable<JSONObject>>
+  },
+  updateProfile: async (profile: JSONObject) => {
+    return TauriInvoker.writeStorageFileJSON('profile.json', profile)
+  },
+  getProgression: async () => {
+  return TauriInvoker.getStorageFileJSON('progression.json') as Promise<Errorable<JSONObject>>
+  },
+  updateProgression: async (progression: JSONObject) => {
+  return TauriInvoker.writeStorageFileJSON('progression.json', progression)
+  },
   setTheme: (appTheme: 'light' | 'dark' | 'system'): Promise<Errorable<null>> =>
     TauriInvoker.setTheme(appTheme),
   emitMenuEvent: TauriInvoker.handleMenuAccelleratorWindows,

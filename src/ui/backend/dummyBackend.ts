@@ -1,5 +1,6 @@
 import * as E from 'fp-ts/lib/Either'
 import BackendInterface, { BackendListeners } from './backendInterface'
+import { JSONObject } from 'src/core/util/types'
 
 const DummyBackend: BackendInterface = {
   /* past gen identifier lookups */
@@ -52,6 +53,10 @@ const DummyBackend: BackendInterface = {
   getState: async () => E.left('no backend in use'),
   getSettings: async () => E.left('no backend in use'),
   updateSettings: async () => E.left('no backend in use'),
+  getProfile: async () => E.right({} as JSONObject),
+  updateProfile: async () => E.right(null),
+  getProgression: async () => E.right({} as JSONObject),
+  updateProgression: async () => E.right(null),
   setTheme: async () => E.left('no backend in use'),
   saveLocalFile: async () => E.left('no backend in use'),
   emitMenuEvent: async () => null,

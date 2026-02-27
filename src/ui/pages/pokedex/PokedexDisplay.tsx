@@ -15,6 +15,8 @@ import PokedexSidebar from './PokedexSidebar'
 import './style.css'
 import TooltipPokemonIcon from './TooltipPokemonIcon'
 import { getFormeStatus, getPokedexSummary } from './util'
+import RegionProgressPanel from './RegionProgressPanel'
+import { computeDexProgress } from '@openhome-core/progression/dexProgress'
 
 export default function PokedexDisplay() {
   const pokedexState = usePokedex()
@@ -32,6 +34,18 @@ export default function PokedexDisplay() {
   ).length
 
   const seenCount = Object.values(pokedex.byDexNumber).length
+
+  const caughtDexNums = new Set<number>(
+  Object.entries(pokedex.byDexNumber)
+    .filter(([, entry]) => Object.values(entry.formes).some((status) => status.endsWith('Caught')))
+    .map(([dexNum]) => Number(dexNum))
+  )
+
+  const seenDexNums = new Set<number>(
+    Object.keys(pokedex.byDexNumber).map((dexNum) => Number(dexNum))
+  )
+
+  const dexProgress = computeDexProgress(caughtDexNums, seenDexNums)
 
   return (
     <Flex direction="column" height="100%" minWidth="940px">
@@ -51,8 +65,9 @@ export default function PokedexDisplay() {
           onChange={(e) => setFilter(e.target.value)}
         />
       </div>
-      <Flex style={{ height: 'calc(100% - 34px)' }}>
-        <Flex className="pokedex-body" direction="column" width="calc(100% - 300px)">
+      <Flex style={{ height: 'calc(100% - 0px)' }}>
+      <RegionProgressPanel progress={dexProgress} />
+      <Flex className="pokedex-body" direction="column" width="calc(100% - 580px)">
           {selectedSpecies && selectedForme && (
             <PokedexDetails
               pokedex={pokedex}
